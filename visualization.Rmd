@@ -61,6 +61,39 @@ weather_df|>
   ggplot(aes(x=tmax,y=tmin))+
   geom_point()
 ```
+a hex plot
+```{r}
+weather_df|>
+  ggplot(aes(x=tmin,y=tmax))+
+  geom_hex()
+```
+```{r}
+weather_df|>
+  ggplot(aes(x=tmax,color=name))+
+  geom_histogram(position="dodge")#position = "dodge"如果同一个温度区间里有多个 name，把它们的柱子并排放，而不是叠在一起。
+```
+```{r}
+weather_df|>
+  ggplot(aes(x=tmax,fill=name))+
+  geom_density(alpha=.3)
+```
+```{r}
+weather_df|>
+  ggplot(aes(x=tmax,y=name))+
+  geom_density_ridges()
+```
+```{r}
+ggp_weather = 
+  weather_df |> 
+  ggplot(aes(x = tmin, y = tmax)) + 
+  geom_point(aes(size=prcp), alpha = .5) +
+  facet_grid(.~name)
+
+ggsave("images/ggp_weather.pdf", ggp_weather, width = 8, height = 5)
+```
+
+
+
 
 
 
