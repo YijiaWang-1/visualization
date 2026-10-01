@@ -25,10 +25,43 @@ ggplot(weather_df,aes(x=tmin,y=tmax))+
 ```{r}
 gg_temp_scatterplot=
   weather_df|>
-    ggplot(aes(x=tmin,y=tmax))+
-    geom_point()
+    ggplot(aes(x=tmin,y=tmax,color=name))+
+    geom_point(alpha=.25)+ #transparent
+    geom_smooth(se=FALSE) #ggplot2 给图加一条平滑趋势线，同时不显示置信区间的阴影
 gg_temp_scatterplot
 ```
+show faceting
+```{r}
+weather_df|>
+  ggplot(aes(x=tmin,y=tmax,color=name))+
+  geom_point(alpha=.5)+ #transparent
+  facet_grid(.~name)#facet_grid(行 ~ 列)
+```
+```{r}
+weather_df|>
+  ggplot(aes(x=tmin,y=tmax,color=name))+
+  geom_point(alpha=.5)+ #transparent
+  facet_grid(cols=vars(name))#facet_grid(行 ~ 列)
+```
+let's look at something else
+```{r}
+weather_df|>
+  ggplot(aes(x=date,y=tmax,color=name))+#日期和最高温对应
+  geom_point(alpha=.5)+
+  geom_smooth(se=FALSE)+
+  facet_grid(.~name)
+```
+
+```{r}
+weather_df|>
+  filter(name=="CentralPark_NY")|>
+  mutate(
+    tmax=tmax*9/5 + 32,
+    tmin=tmin*9/5 + 32)|>
+  ggplot(aes(x=tmax,y=tmin))+
+  geom_point()
+```
+
 
 
 
