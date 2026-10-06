@@ -190,6 +190,21 @@ weather_df|>
   ggplot(aes(x=name,y=tmax))+
   geom_boxplot()
 ```
+Make that distribution plot
+```{r}
+weather_df|>
+  select(name,tmax,tmin)|>
+  pivot_longer(
+    tmax:tmin,
+    names_to="observation",
+    values_to="temp"
+  )|>
+  ggplot(aes(x=temp,fill=observation))+#aes:数据变量 → 图上的视觉属性
+  geom_density(alpha=.5)+
+  facet_grid(.~name)
+```
+
+
 
 
 
