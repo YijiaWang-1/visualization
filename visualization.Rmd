@@ -8,6 +8,7 @@ output: github_document
 ```{r}
 library(tidyverse)
 library(ggridges)
+library(patchwork)
 library(p8105.datasets)
 data("weather_df")
 ```
@@ -79,8 +80,23 @@ weather_df|>
 ```
 ```{r}
 weather_df|>
-  ggplot(aes(x=tmax,y=name))+
-  geom_density_ridges()
+  ggplot(aes(x=tmax,y=tmin, color=name))+
+  geom_point()+
+  labs(
+    title="temperature(Max vs Min)",
+    x="Max Temperature(C)",
+    y="Min Temperature(C)",
+    color="Location",
+    caption="Data from NGAA for three weather stations"
+  )+
+  scale_x_continuous(
+    breaks=c(-10,0,15),
+    labels=c("-10 C","0","fifteen")#这些刻度显示成什么文字
+  )+
+  scale_y_continuous(
+    trans="sqrt",#平方根转换
+    position="right"
+  )
 ```
 ```{r}
 ggp_weather = 
@@ -91,6 +107,77 @@ ggp_weather =
 
 ggsave("images/ggp_weather.pdf", ggp_weather, width = 8, height = 5)
 ```
+```{r}
+weather_df|>
+  ggplot(aes(x=tmax,y=tmin,color=name))+
+  geom_point()+
+  viridis::scale_color_viridis(#使用 viridis color palette 来给不同的 name 配色
+    name="Location",
+    discrete=TRUE
+  )+
+  theme_bw()+
+  theme(legend.position="bottom")+
+  theme_minimal()#简洁风格
+```
+```{r}
+weather_df|>
+  ggplot(aes(x=date,y=tmax,color=name))+
+  geom_point()+
+  geom_smooth(se=FALSE)+
+  labs(
+    title="Seasonal trends in Max Temp",
+    x="Date",
+    y="Max Temp",
+    caption="Max daily temp in three weather staions in 2020 and 2021",
+    color="Location"
+  )+
+  viridis::scale_color_viridis(#使用 viridis color palette 来给不同的 name 配色
+    name="Location",
+    discrete=TRUE
+  )+
+  theme(legend.position="bottom")+
+  theme_minimal()#简洁风格
+```
+##Two more weird but useful plot things
+```{r}
+central_park_df=
+  weather_df|>
+  filter(name=="CentralPark_NY")
+molokai_df=
+  weather_df|>
+  filter(name=="Molokai_HI")
+ggplot(molokai_df,aes(x=date,y=tmax,color=name))+
+  geom_point()+
+  geom_line(data=central_park_df)
+```
+multiple panels with different plot types
+```{r}
+ggp_tmax_tmin = 
+  weather_df |> 
+  ggplot(aes(x = tmax, y = tmin, color = name)) + 
+  geom_point(alpha = .5) +
+  theme(legend.position = "none")
+
+ggp_prcp_dens = 
+  weather_df |> 
+  filter(prcp > 0) |> #把没有降水的 observation 排除掉
+  ggplot(aes(x = prcp, fill = name)) + 
+  geom_density(alpha = .5) + 
+  theme(legend.position = "none")
+
+ggp_tmax_date = 
+  weather_df |> 
+  ggplot(aes(x = date, y = tmax, color = name)) + 
+  geom_point(alpha = .5) +
+  geom_smooth(se = FALSE) + 
+  theme(legend.position = "bottom")
+
+(ggp_tmax_tmin + ggp_prcp_dens) / ggp_tmax_date#先把这两张图组合成第一行
+```
+
+
+
+
 
 
 
