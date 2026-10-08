@@ -234,6 +234,81 @@ fas_data |>
   geom_violin() + 
   facet_grid(day_of_tx ~ outcome)
 ```
+```{r}
+weather_df |> 
+  filter(tmax >= 20, tmax <= 30) |> 
+  ggplot(aes(x = tmin, y = tmax, color = name, shape = name)) + 
+  geom_point(alpha = .75)
+```
+```{r}
+weather_df =
+  weather_df|>
+  mutate(
+    month = lubridate::floor_date(date, unit = "month")
+  )
+weather_df|>
+  group_by(month)|>
+  summarise(#summary function-之后不能再基于它处理了
+    n_obs = n(),
+    n_days = n_distinct(date))#计算每个月有多少 observations 和多少不同的 days → 最后把这个汇总后的表重新存回 weather_df
+```
+```{r}
+weather_df |>
+  group_by(name, month) |>
+  summarize(mean_tmax = mean(tmax, na.rm = TRUE)) |> 
+  pivot_wider(
+    names_from = name,
+    values_from = mean_tmax) |> 
+  knitr::kable(digits = 1)
+```
+```{r}
+weather_df |>
+  group_by(name) |>
+  mutate(
+    center_tmax = tmax - mean(tmax, na.rm = TRUE)
+  ) |>
+  ggplot(aes(x = date, y = center_tmax, color = name)) +
+  geom_point()
+```
+```{r}
+weather_df |>
+  group_by(name, month) |>
+  mutate(temp_ranking = min_rank(tmax))#出现数值并列时，使用并列位置中最小的 rank
+```
+```{r}
+weather_df |>
+  group_by(name, month) |>
+  filter(min_rank(desc(tmax)) < 4)
+```
+```{r}
+weather_df |>
+  group_by(name) |>
+  mutate(temp_change = tmax - lag(tmax))|>#当前这一行的 tmax − 前一行的 tmax
+  summarize(
+    temp_change_sd = sd(temp_change, na.rm = TRUE),
+    temp_change_max = max(temp_change, na.rm = TRUE))
+```
+## revisit some examples
+import,clean,tidy,etc the pulse data, and compute mean and median BOI score at each visit
+```{r}
+pulse_data = 
+  haven::read_sas("./data/public_pulse_data.sas7bdat") |>
+  janitor::clean_names() |>
+  pivot_longer(
+    bdi_score_bl:bdi_score_12m,
+    names_to="visit",
+    names_prefix = "bdi_score_",
+    values_to="bdi"
+  )|>
+  select(id,visit,everything())|>#把 id 和 visit 放到数据集最前面，其他变量全部跟在后面
+  mutate(visit=replace(visit,visit=="bl","00m"))#改 visit 变量，把其中等于 "bl" 的值替换成 "00m"
+pulse_data
+```
+
+
+
+
+
 
 
 
